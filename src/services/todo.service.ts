@@ -13,13 +13,13 @@ const todoApi = createApi({
   refetchOnReconnect: false,
   tagTypes: ["getTodoList"],
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://hello.com/api",
+    baseUrl: "http://localhost:3000/api",
     headers: {
       "Content-Type": "application/json"
     }
   }),
   endpoints: (builder) => ({
-    getTodoList: builder.query<{ data: TodoItem[] }, any>({
+    getTodoList: builder.query<TodoItem[], any>({
       providesTags: ["getTodoList"],
       query: (params: any) => ({
         url: CRUD_TODO_LIST_ENDPOINT,

@@ -1,23 +1,37 @@
 import "./TodoForm.css"
-import React, { useState } from "react"
+import React, { useMemo } from "react"
 import {
   IonLabel,
   IonButton,
   IonContent,
   IonItem,
   IonInput,
-  IonList
+  IonList,
+  IonSkeletonText
 } from "@ionic/react"
 
 import { useForm } from "react-hook-form"
 import { ErrorMessage } from "@hookform/error-message"
+import { useGetTodoListQuery } from "../services/todo.service"
+import { TodoItem } from "../@types/todo"
 
 type FormValues = {
   todo: string
 }
 
 const TodoForm: React.FunctionComponent = () => {
-  const [data, setData] = useState<string[]>([])
+  const {
+    data: todoData,
+    isLoading,
+    isFetching,
+  } = useGetTodoListQuery(undefined)
+
+  const todoRecord = useMemo(() => {
+    return todoData as TodoItem[]
+  }, [todoData])
+
+  console.log("todoRecord", todoRecord)
+
   const {
     handleSubmit,
     register,
@@ -30,15 +44,15 @@ const TodoForm: React.FunctionComponent = () => {
   })
 
   const handleAdd = (value: string) => {
-    const nextData = [...data]
-    nextData.push(value)
-    setData(nextData)
+    // const nextData = [...data]
+    // nextData.push(value)
+    // setData(nextData)
   }
 
   const handleDelete = (index: number) => {
-    const nextData = [...data]
-    nextData.splice(index, 1)
-    setData(nextData)
+    // const nextData = [...data]
+    // nextData.splice(index, 1)
+    // setData(nextData)
   }
 
   /**
@@ -51,12 +65,29 @@ const TodoForm: React.FunctionComponent = () => {
   }
 
   const renderTodoList = () => {
-    // if(loading) return null
-    if (!data.length) {
+    if (isLoading || isFetching) {
+      return (
+        <IonItem>
+          <div
+            style={{ height: 24, width: 64, marginRight: 16, marginBottom: 12 }}
+          >
+            <IonSkeletonText animated={true} />
+          </div>
+          <IonLabel>
+            <h3>
+              <IonSkeletonText animated={true} style={{ width: "80%" }} />
+            </h3>
+            <IonSkeletonText animated={true} style={{ width: "30%" }} />
+          </IonLabel>
+        </IonItem>
+      )
+    }
+
+    if (!todoRecord.length) {
       return <div>Empty</div>
     }
 
-    return data.map((value, index) => (
+    return todoRecord.map((value, index) => (
       <IonItem key={`todo_list_item_${index}`}>
         <IonButton
           style={{ marginRight: 8 }}
@@ -67,7 +98,7 @@ const TodoForm: React.FunctionComponent = () => {
         >
           Delete
         </IonButton>
-        <IonLabel>{value}</IonLabel>
+        <IonLabel>{value.note}</IonLabel>
       </IonItem>
     ))
   }

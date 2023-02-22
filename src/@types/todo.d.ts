@@ -1,1 +1,4 @@
-export interface TodoItem {}
+export interface TodoItem {
+  id: number
+  note: string
+}
