@@ -1,0 +1,7 @@
+{
+  "name": "juleb-test",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

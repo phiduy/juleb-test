@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.starter",
+	"appName": "juleb-test",
+	"webDir": "build",
+	"bundledWebRuntime": false
+}
