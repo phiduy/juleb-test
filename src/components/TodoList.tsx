@@ -33,7 +33,7 @@ const TodoList: React.FunctionComponent = () => {
       )
     }
 
-    if (!todoRecord.length) {
+    if (!todoRecord) {
       return <div>Empty</div>
     }
 
