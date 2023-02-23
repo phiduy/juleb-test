@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 // import { ACADEMY_URL } from "../constants/config"
-import { TodoItem } from "../@types/todo"
+import { ITodoItem } from "../@types/todo"
 import {
   CRUD_TODO_LIST_ENDPOINT,
   CRUD_TODO_ADD_ENDPOINT,
@@ -19,35 +19,34 @@ const todoApi = createApi({
     }
   }),
   endpoints: (builder) => ({
-    getTodoList: builder.query<TodoItem[], any>({
+    getTodoList: builder.query<ITodoItem[], any>({
       providesTags: ["getTodoList"],
-      query: (params: any) => ({
+      query: (params) => ({
         url: CRUD_TODO_LIST_ENDPOINT,
         params
       })
     }),
-    addTodo: builder.mutation<{ data: TodoItem[] }, any>({
+    addTodo: builder.mutation<{ data: ITodoItem; success: boolean }, { note: string }>({
       invalidatesTags: ["getTodoList"],
-      query: (body: any) => ({
+      query: (body) => ({
         url: CRUD_TODO_ADD_ENDPOINT,
         method: "POST",
         body
       })
     }),
-    updateTodo: builder.mutation<{ data: TodoItem[] }, any>({
+    updateTodo: builder.mutation<{ data: ITodoItem; success: boolean }, { id:string, body: { note: string } }>({
       invalidatesTags: ["getTodoList"],
-      query: (body: any) => ({
-        url: CRUD_TODO_UPDATE_ENDPOINT,
-        method: "PUT",
+      query: ({ id, body }) => ({
+        url: CRUD_TODO_UPDATE_ENDPOINT(id),
+        method: "PATCH",
         body
       })
     }),
-    deleteTodo: builder.mutation<{ data: TodoItem[] }, any>({
+    deleteTodo: builder.mutation<{ success: boolean }, string>({
       invalidatesTags: ["getTodoList"],
-      query: (body: any) => ({
-        url: CRUD_TODO_DELETE_ENDPOINT,
-        method: "DELETE",
-        body
+      query: (id) => ({
+        url: CRUD_TODO_DELETE_ENDPOINT(id),
+        method: "DELETE"
       })
     })
   })

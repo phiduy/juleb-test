@@ -1,58 +1,56 @@
 import "./TodoForm.css"
-import React, { useMemo } from "react"
+import React, { CSSProperties, ReactNode } from "react"
 import {
   IonLabel,
   IonButton,
-  IonContent,
   IonItem,
   IonInput,
-  IonList,
-  IonSkeletonText
+  IonSpinner
 } from "@ionic/react"
 
 import { useForm } from "react-hook-form"
 import { ErrorMessage } from "@hookform/error-message"
-import { useGetTodoListQuery } from "../services/todo.service"
-import { TodoItem } from "../@types/todo"
+import { useAddTodoMutation } from "../services/todo.service"
 
 type FormValues = {
   todo: string
 }
 
-const TodoForm: React.FunctionComponent = () => {
-  const {
-    data: todoData,
-    isLoading,
-    isFetching,
-  } = useGetTodoListQuery(undefined)
+interface Props {
+  actions?: ReactNode
+  defaultValues?: FormValues
+  style?: CSSProperties
+  onSubmit?: (data: FormValues) => void;
+}
 
-  const todoRecord = useMemo(() => {
-    return todoData as TodoItem[]
-  }, [todoData])
-
-  console.log("todoRecord", todoRecord)
-
+const TodoForm: React.FunctionComponent<Props> = ({
+  style,
+  defaultValues,
+  onSubmit: onSubmitCustom,
+  actions
+}) => {
   const {
     handleSubmit,
     register,
     resetField,
     formState: { errors }
   } = useForm<FormValues>({
-    defaultValues: {
+    defaultValues: defaultValues || {
       todo: ""
     }
   })
 
-  const handleAdd = (value: string) => {
-    // const nextData = [...data]
-    // nextData.push(value)
-    // setData(nextData)
-  }
+  const [addTodo, { isLoading: isAdding }] = useAddTodoMutation()
 
-  const handleDelete = (index: number) => {
-    // const nextData = [...data]
-    // nextData.splice(index, 1)
-    // setData(nextData)
+  const handleAdd = async (value: string) => {
+    try {
+      const response = await addTodo({ note: value }).unwrap()
+      if (response.success) {
+        return
+      }
+    } catch (error) {
+      console.log("hello")
+    }
   }
 
   /**
@@ -60,73 +58,44 @@ const TodoForm: React.FunctionComponent = () => {
    * @param data
    */
   const onSubmit = (data: FormValues) => {
-    handleAdd(data.todo)
+    if(onSubmitCustom) {
+      onSubmitCustom(data)
+    }else {
+      handleAdd(data.todo)
+    }
     resetField("todo")
   }
 
-  const renderTodoList = () => {
-    if (isLoading || isFetching) {
-      return (
-        <IonItem>
-          <div
-            style={{ height: 24, width: 64, marginRight: 16, marginBottom: 12 }}
-          >
-            <IonSkeletonText animated={true} />
-          </div>
-          <IonLabel>
-            <h3>
-              <IonSkeletonText animated={true} style={{ width: "80%" }} />
-            </h3>
-            <IonSkeletonText animated={true} style={{ width: "30%" }} />
-          </IonLabel>
-        </IonItem>
-      )
-    }
-
-    if (!todoRecord.length) {
-      return <div>Empty</div>
-    }
-
-    return todoRecord.map((value, index) => (
-      <IonItem key={`todo_list_item_${index}`}>
-        <IonButton
-          style={{ marginRight: 8 }}
-          color="danger"
-          onClick={() => {
-            handleDelete(index)
-          }}
-        >
-          Delete
-        </IonButton>
-        <IonLabel>{value.note}</IonLabel>
-      </IonItem>
-    ))
-  }
-
   return (
-    <IonContent className="ion-padding">
-      <form onSubmit={handleSubmit(onSubmit)}>
-        {/* === ION INPUT === */}
-        <IonItem>
-          <IonLabel>Todo</IonLabel>
-          <IonInput
-            {...register("todo", {
-              required: "This is a required field"
-            })}
-          />
-        </IonItem>
-        <ErrorMessage
-          errors={errors}
-          name="todo"
-          as={<div style={{ color: "red" }} />}
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className='todo-form'
+      style={style}
+    >
+      {/* === ION INPUT === */}
+      <IonItem>
+        <IonLabel>Todo</IonLabel>
+        <IonInput
+          {...register("todo", {
+            required: "This is a required field"
+          })}
         />
-        <IonButton type="submit">Add</IonButton>
-      </form>
-      <IonList>
-        <IonLabel>Todo list</IonLabel>
-        {renderTodoList()}
-      </IonList>
-    </IonContent>
+      </IonItem>
+      <ErrorMessage
+        errors={errors}
+        name="todo"
+        as={<div style={{ color: "red" }} />}
+      />
+      {actions || (
+        <IonButton type="submit" disabled={isAdding}>
+          {isAdding ? (
+            <IonSpinner name="crescent" style={{ width: 18 }} />
+          ) : (
+            "Add"
+          )}
+        </IonButton>
+      )}
+    </form>
   )
 }
 

@@ -6,3 +6,8 @@ p {
 ion-label {
   font-weight: bold;
 }
+
+
+.todo-form {
+  padding-bottom: 16px;
+}

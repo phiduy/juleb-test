@@ -1,4 +1,4 @@
-export interface TodoItem {
-  id: number
+export interface ITodoItem {
+  id: string
   note: string
 }
